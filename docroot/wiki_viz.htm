@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+<style>
+
+h4{
+      -webkit-margin-before: .5em;
+      -webkit-margin-after: .5em;
+}
+
+h3{
+      -webkit-margin-before: .25em;
+      -webkit-margin-after: .25em;
+}
+
+body{
+  font-family: "Open Sans Condensed";
+}
+
+button {
+    border: none;
+    padding: 4px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
+
+.title{
+  font-size: 24px;
+}
+
+.incoming_arc path{
+  stroke: #fff;
+  stroke-opacity: .5;
+  stroke-width: 5;
+}
+
+.outgoing_arc path{
+  stroke: #fff;
+  stroke-opacity: .5;
+  stroke-width: 5;
+}
+
+.incoming_arc .little-text{
+    text-anchor: left;
+}
+
+.outgoing_arc .little-text{
+  text-anchor: center;
+}
+.little-text{
+  font-size:12px;
+  stroke: #000;
+  stroke-width: .5;
+  stroke-opacity: .8;
+  fill: #000;
+  cursor: pointer;
+}
+
+.explain_title{
+  font-size: 20px;
+  margin-left: 17%;
+}
+
+.hidden{
+  display: none;
+}
+
+.spinner{
+  fill: #ccc;
+}
+
+.help_circle{
+  /*stroke:#5D6F16;
+  stroke-width: 1px;*/
+  fill:rgba(177, 171, 49, 0.41);
+  cursor: pointer;
+}
+
+.help_box_open{
+  fill: #5D6F16;
+}
+
+#help_box{
+  position: absolute;
+  width: 910px;
+  height: 570px;
+  border-radius: 8px;
+  left: 10px;
+  top: 40px;
+  background: #fff;
+  border: #000 1px solid;
+  padding: 6px;
+}
+
+
+#close_about{
+  margin-left: 25%;
+  color: white;
+  background-color: rgba(85, 0, 0, 0.79);
+}
+
+#close_about:hover {
+  background-color: white;
+  color: rgba(85, 0, 0, 0.79);
+}
+
+#go_btn{
+  background-color: rgba(0,68,0,0.79);
+  color: white;
+}
+
+#go_btn:hover{
+  color: rgba(0,68,0,0.79);
+  background-color: white;
+}
+
+.paypal_btn{
+  margin-left: 25%;
+}
+
+#wikilogo{
+    float: right;
+}
+
+.tooltip {
+    position: absolute;
+    text-align: center;
+    vertical-align: middle;
+    display: table-cell;
+    width: 90px;
+    height: 60px;
+    padding: 2px;
+    font-size: 12px;
+    color: #101010;
+    border:#101010 1px solid;
+    background: #C4C4C4;
+    border-radius: 8px;
+    pointer-events: none;
+}
+.tooltip table{
+  width: 100%;
+  height: 100%;
+}
+
+/*.tt_subtext{
+  font: 8px Arial Narrow;
+}*/
+
+</style>
+<title>Wiki Visualization</title>
+</head><body>
+<div id="tooltip" class="hidden">
+<table>
+  <tbody>
+    <tr><td id="tooltip_txt"></td></tr>
+    <tr><td><span id="tooltip_subtext" class="tt_subtext"></span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div id = "controls">
+  <input id="curr_page"></input>
+  <button id="go_btn">Go!</button>
+  <span class="explain_title">English Wikipedia - March 2016</span>
+</div>
+
+<div id="help_box" class="hidden">
+  <span id="wikilogo"><a href="https://en.wikipedia.org/wiki/Main_Page"><img style="width:60px;height:60px;"src="wikipuzzle.png"></a></span>
+  <h3>Wiki Clickstream Visualization</h3>
+
+  <p>Know how you go to Wikipedia to look something up like "History of Italy", but spend hours clicking around and reading about Pizza instead?  Turns out you're not the only one.
+  <br/>
+  This site shows the clickstream data across English Wikipedia for March 2016. On startup, a random article from a small list is selected, but all the articles in the dataset are available when you search or click.</p>
+
+  <h4>Reading the values</h4>
+
+  <p>The wedges on the left are 'incoming' links to a given article; that is, the page people visited <strong>before</strong> the article in the middle.  The wedges on the right are 'outgoing' links; the links people clicked on next.</p>
+
+  <p>The bigger the wedge, the more people clicked through that particular path.  Hovering over the wedge shows the exact number of people recorded clicking through.
+     The darker the wedge, the more linked views that article had overall.</p>
+
+  <h4>Navigation</h4>
+
+  <p>If you click on the text of a wedge, or change the text at the top left and click 'Go!', you'll navigate over to that article's incoming and outgoing clickstream information.</p>
+  <h4> About </h4>
+  <p> Created by <a href="//github.com/nimishgautam/">Nimish Gautam</a> using data from <a href="//figshare.com/articles/Wikipedia_Clickstream/1305770">figshare</a>, using <a href="//d3js.org/">d3js</a> and <a href="//couchdb.apache.org/">couchdb</a>.
+    Please send any constructive feedback to &#110;&#105;&#109;&#105;&#115;&#104;&#103;&#064;&#110;&#105;&#109;&#105;&#115;&#104;&#103;&#046;&#099;&#111;&#109; with the subject 'Wiki Clickstream'
+  </p>
+  <div id="about_btns">
+  <button id="close_about">Close</button> 
+
+</div>
+</div>
+
+<script src="d3.v3.min.js"></script>
+
+<script>
+
+var top_pages = ['Wikipedia', 'Pizza']; // replace this with selected pages to load at random on pageload or error
+
+var width = 960,
+    height = 740,
+    radius = Math.min(width, height) / 2;
+
+var arc = d3.svg.arc()
+    .outerRadius(radius - 10)
+    .innerRadius(50)
+    .cornerRadius(5);
+
+var incoming_labelArc = d3.svg.arc()
+    .outerRadius(radius - 15)
+    .innerRadius(radius -15);
+
+var outgoing_labelArc = d3.svg.arc()
+    .outerRadius(radius /2 )
+    .innerRadius(radius/2);
+
+var outgoing_layout = d3.layout.pie()
+    .startAngle(Math.PI / 10.0)
+    .endAngle(9 * Math.PI/ 10.0)
+    .sort(null)
+    .value(function(d) { return d.val; });
+
+var incoming_layout = d3.layout.pie()
+    .startAngle((2 - (1/10)) * Math.PI)
+    .endAngle((1+ (1/10)) * Math.PI)
+    .sort(null)
+    .value(function(d) { return d.val; });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var svg_bg = svg.append("g");
+
+var incoming_color_set = ["#550000"];
+//["#87c733", "#a5de5b", "#518b04", "#396500"];
+//["#f0f"];
+
+var outgoing_color_set = ["#004400"];
+//["#4b6aa2", "#305291", "#0d2c65", "#051d4a"];
+//["#00f"];
+
+var background_color = "#fff";
+
+// for readability
+var max_wedges = 20;
+
+incoming_colors = d3.scale.ordinal().range(d3.range(0,incoming_color_set.length));
+outgoing_colors = d3.scale.ordinal().range(d3.range(0,outgoing_color_set.length));
+
+for (i in incoming_color_set){
+  var incoming_gradient = svg.append("defs")
+    .append("linearGradient")
+    .attr("id", "incoming-gradient-" + i);
+
+  incoming_gradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", incoming_color_set[i])
+      .attr("stop-opacity", '1');
+
+  incoming_gradient.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", background_color)
+      .attr("stop-opacity", "0");
+}
+
+for (i in outgoing_color_set){
+  var outgoing_gradient = svg.append("defs")
+    .append("linearGradient")
+    .attr("id", "outgoing-gradient-" + i);
+
+  outgoing_gradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", background_color)
+      .attr("stop-opacity", '0');
+
+  outgoing_gradient.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", outgoing_color_set[i])
+      .attr("stop-opacity", "1");
+}
+
+var txt = svg.append("text")
+              .text("Loading...")
+              .classed("title", true);
+
+    txt.attr("dx", (0 - txt.node().getBBox().width / 2));
+
+// Define the div for the tooltip
+var tooltip_div = d3.select("#tooltip")
+    .style("opacity", 0)
+    .classed("hidden", false)
+    .classed("tooltip", true);
+var tooltip_txt = d3.select("#tooltip_txt");
+var tooltip_subtext = d3.select("#tooltip_subtext");
+
+svg.append("text")
+          .text("?")
+          .classed("help_box_open", true)
+          .attr("dx", 0 - ((width /2) - 13))
+          .attr("dy", 46 - (height/2));
+
+
+var help_circle = svg.append("circle").attr("cx", 0-((width /2) - 14))
+                .classed("help_circle", true)
+                .attr("cy", 40 - (height/2))
+                .attr("r", 11)
+                .on("click", function(){
+                  d3.select("#help_box").classed("hidden", false);
+                });
+
+
+/*var explain_title = svg.append("text")
+          .text("English Wikipedia - March 2016")
+          .classed("explain_title", true)
+          .attr("dy", 20 - (height/2));
+
+explain_title.attr("dx", 0 - explain_title.node().getBBox().width/2);*/
+
+d3.select("#close_about").on("click", function(){
+  d3.select("#help_box").classed("hidden", true);
+});
+
+d3.select("#curr_page").on("input", function(){
+  d3.select(this).attr("value", this.value);
+});
+
+d3.select("#go_btn").on("click", function(){
+  current_page = deformat_name(d3.select("#curr_page").attr("value"));
+  console.log(d3.select("#curr_page").attr("value"));
+  reset_chart();
+  load_json();
+});
+
+var current_page = get_random_page_name();
+var still_loading = false;
+var is_reset = false;
+
+var data_path = "/wikiviz/db/wiki_stream/"
+
+var load_spinner = function(){
+  var spinner_arc = d3.svg.arc()
+            .innerRadius(45)
+            .outerRadius(50)
+            .startAngle(0);
+
+  var spin_bg = svg_bg.append("path")
+        .datum({endAngle: 0.15* 2 * Math.PI})
+        .attr("d", spinner_arc)
+        .classed("spinner", true)
+        .call(spin, 1500);
+
+  function spin(selection, duration) {
+        selection.transition()
+            .ease("linear")
+            .duration(duration)
+            .attrTween("transform", function() {
+                return d3.interpolateString("rotate(0)", "rotate(360)");
+            });
+        if(still_loading){
+          setTimeout(function() { spin(selection, duration); }, duration);
+        }
+    }
+};
+
+var reset_chart = function(){
+  svg_bg.selectAll(".incoming_arc").remove();
+  svg_bg.selectAll(".outgoing_arc").remove();
+  svg_bg.selectAll(".spinner").remove();
+  is_reset = true;
+};
+
+var format_name = function(raw_str){
+    return raw_str.replace(/_/g, " ");
+};
+
+var deformat_name = function(formatted_str){
+  return formatted_str.replace(/ /g, "_");
+}
+
+var load_json = function(){
+
+  still_loading = true;
+  load_spinner();
+
+  d3.json(data_path + current_page, function(error, data) {
+    if (error){
+      if(error.status == 404){
+        new_page = get_random_page_name();
+        alert("Couldn't find "+ current_page +", defaulting to '"+ new_page +"'");
+        current_page = new_page;
+        load_json();
+      }
+      else{
+        throw error;
+      }
+    }
+
+    still_loading = false;
+    svg_bg.selectAll(".spinner").remove();
+
+    d3.selectAll("title").text(format_name(current_page));
+    current_page = data.title;
+    txt.text(format_name(current_page));
+    var bbox = txt.node().getBBox();
+    txt.attr("dx", (0 - bbox.width / 2));
+    d3.select("#curr_page").property("value", current_page);
+
+    // "preprocess" data
+    var desc_sort = function(a,b){ return d3.descending(a.val, b.val);};
+    data.incoming = data.incoming.sort(desc_sort);
+    data.outgoing = data.outgoing.sort(desc_sort);
+    data.incoming = data.incoming.slice(0, max_wedges );
+    data.outgoing = data.outgoing.slice(0, max_wedges );
+
+
+    var incoming_max = d3.max(data.incoming, function(d) { return d['weight'] * 1000; });
+    var incoming_min = d3.min(data.incoming, function(d) { return d['weight'] * 1000; });
+    var incoming_opacity = d3.scale.linear()
+                          .domain([incoming_min, incoming_max])
+                          .range([0.3,1.0]);
+
+    var outgoing_max = d3.max(data.outgoing, function(d) { return d['weight'] *1000; });
+    var outgoing_min = d3.min(data.outgoing, function(d) { return d['weight'] *1000; });
+    var outgoing_opacity = d3.scale.linear()
+                          .domain([outgoing_min, outgoing_max])
+                          .range([0.3,1.0]);
+
+    var arc_rotate_text = function(d, myArc){
+      var centroid = myArc.centroid(d);
+      return "translate(" + centroid + ")" +
+            "rotate(" + (Math.atan( centroid[1]/centroid[0] )  * 180 / Math.PI)+")";
+    };
+
+    var show_tooltip = function(d) {
+        tooltip_div
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px")
+        .transition()
+        .duration(200)
+        .style("opacity", .9);
+        tooltip_txt.text( format_name(d.data.name));
+        tooltip_subtext.text(d.value);
+
+        };
+
+    var hide_tooltip = function(d){
+        tooltip_div.transition()
+            .duration(500)
+            .style("opacity", 0);
+    };
+
+    var on_click_transition = function(d){
+        var new_text = d3.select(this).text();
+        txt.attr("opacity", 0).text(new_text);
+        var bbox = txt.node().getBBox();
+        txt.attr("dx", 0 - bbox.width /2);
+        current_page = d.data.name;
+        d3.select("#curr_page").attr("value", format_name(current_page));
+        d3.select(this)
+          .classed("little-text", false)
+          .classed("title", true)
+          .attr("dx", txt.attr("dx"))
+          .transition()
+          .duration(1000)
+          .attr("dy", "0")
+          .attr("transform", "translate(0,0) rotate(0)")
+          .each("end", function(){
+            d3.selectAll('path[data-name="'+ d3.select(this).attr("data-name") +'"]').
+            transition().
+            duration(1000).
+            attr("transform", "scale(.01)")
+            .each("end", function(){
+              d3.select(this).classed("hidden", true);
+              txt.attr("opacity", 1);
+              if(!is_reset){
+                reset_chart();
+                load_json();
+            }
+            });
+        });
+    };
+
+    var incoming_arc_g = svg_bg.selectAll(".arc")
+        .data(incoming_layout(data.incoming))
+        .enter().append("g")
+        .attr("class", "incoming_arc hidden");
+
+    incoming_arc_g.append("path")
+        .attr("d", arc)
+        .attr("data-name", function(d){return d.data.name;})
+        .classed("arcpath", true)
+        //.style("fill", function(d){ return "url(#incoming-gradient-" + incoming_colors(d.data.name) +")";})
+        .style("fill", "url(#incoming-gradient-0)")
+        .attr("opacity", function(d){return incoming_opacity(d.data.weight * 1000);})
+        .on("mouseover", show_tooltip)
+        .on("mouseout", hide_tooltip);
+
+    incoming_arc_g.append("text")
+        .attr("transform", function(d){ return arc_rotate_text(d, incoming_labelArc);})
+        .attr("dy", ".35em")
+        .classed("little-text", true)
+        .attr("data-name", function(d) { return d.data.name; })
+        .text(function(d){ return format_name(d.data.name);})
+        .on("click", on_click_transition);
+
+    var outgoing_arc_g = svg_bg.selectAll(".arc2")
+        .data(outgoing_layout(data.outgoing))
+        .enter().append("g")
+        .attr("class", "outgoing_arc hidden");
+
+    outgoing_arc_g.append("path")
+        .attr("d", arc)
+        .attr("data-name", function(d){return d.data.name;})
+        //.style("fill", function(d){ return "url(#outgoing-gradient-"+ outgoing_colors(d.data.name) +")";})
+        .style("fill", "url(#outgoing-gradient-0)")
+        .attr("opacity", function(d){return outgoing_opacity(d.data.weight * 1000);})
+        .on("mouseover", show_tooltip)
+        .on("mouseout", hide_tooltip);
+
+    outgoing_arc_g.append("text")
+        .attr("transform", function(d){ return arc_rotate_text(d, outgoing_labelArc);})
+        .attr("dy", ".35em")
+        .classed("little-text", true)
+        .attr("data-name", function(d) { return d.data.name; })
+        .text(function(d){return format_name(d.data.name);})
+        .on("click", on_click_transition);
+
+
+    svg_bg.selectAll('.incoming_arc').attr("transform","scale(.01)").classed("hidden", false);
+    svg_bg.selectAll('.outgoing_arc').attr("transform","scale(.01)").classed("hidden", false);
+
+    svg_bg.selectAll('.incoming_arc').transition().duration(2000).attr("transform", "scale(1)");
+    svg_bg.selectAll('.outgoing_arc').transition().duration(2000).attr("transform", "scale(1)");
+    is_reset = false;
+
+  });
+
+};
+
+
+var loaded = false;
+
+function get_random_page_name(){
+  return top_pages[Math.floor(Math.random()*top_pages.length)];
+}
+
+load_json();
+</script>
+
+</body></html>
